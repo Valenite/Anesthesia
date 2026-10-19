@@ -1,6 +1,5 @@
 "use client";
-
-import { ArrowUpRight, Github, Disc as DiscordIcon, Shield, Code, Brain } from "lucide-react";
+import { ArrowUpRight, Shield, Code, Brain } from "lucide-react";
 
 const TEAM = [
   {
