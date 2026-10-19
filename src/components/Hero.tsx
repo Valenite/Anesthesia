@@ -5,7 +5,7 @@ import Image from "next/image";
 import { gsap } from "@/lib/gsap";
 import { scrollTo } from "@/lib/lenis";
 import { playTactileClick, playSwordStrikeSound } from "@/lib/audio";
-import { ArrowDown, Sparkles, Zap } from "lucide-react";
+import { ArrowDown, Zap } from "lucide-react";
 
 interface Spark {
   x: number;
@@ -29,6 +29,16 @@ interface Ember {
   phase: number;
 }
 
+interface Shockwave {
+  x: number;
+  y: number;
+  radius: number;
+  maxRadius: number;
+  alpha: number;
+  color: string;
+  lineWidth: number;
+}
+
 export default function Hero({ ready = true }: { ready?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
   const emblemContainerRef = useRef<HTMLDivElement>(null);
@@ -40,49 +50,73 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
   const [isHovered, setIsHovered] = useState(false);
   const [strikeCount, setStrikeCount] = useState(0);
 
+  // Logical container dimensions for rock-solid coordinate math
+  const dimsRef = useRef({ w: 600, h: 330 });
+
   // References for physics and animation loop
   const sparksRef = useRef<Spark[]>([]);
   const embersRef = useRef<Ember[]>([]);
+  const shockwavesRef = useRef<Shockwave[]>([]);
   const arcsRef = useRef<{ points: { x: number; y: number }[]; alpha: number }[]>([]);
   const targetTiltRef = useRef({ x: 0, y: 0 });
   const currentTiltRef = useRef({ x: 0, y: 0 });
   const animFrameRef = useRef<number | null>(null);
 
-  // Trigger high-velocity spark explosion on canvas
-  const triggerCanvasBurst = useCallback((count = 55) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // Trigger high-velocity spark explosion and centered shockwaves on canvas
+  const triggerCanvasBurst = useCallback(() => {
+    const { w, h } = dimsRef.current;
+    const cx = w * 0.5;
+    const cy = h * 0.5;
 
-    const cx = canvas.width * 0.5;
-    const cy = canvas.height * 0.5;
+    // 1. Shockwaves expanding from the dead center
+    shockwavesRef.current.push({
+      x: cx,
+      y: cy,
+      radius: 10,
+      maxRadius: Math.min(w, h) * 0.52,
+      alpha: 0.95,
+      color: "#3b9eff",
+      lineWidth: 2.5,
+    });
+    shockwavesRef.current.push({
+      x: cx,
+      y: cy,
+      radius: 5,
+      maxRadius: Math.min(w, h) * 0.65,
+      alpha: 0.75,
+      color: "#ffffff",
+      lineWidth: 1.5,
+    });
 
+    // 2. High-speed sparks bursting outward
     const colors = ["#ffffff", "#60a5fa", "#3b9eff", "#93c5fd", "#38bdf8"];
+    const sparkCount = 50;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < sparkCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 8 + 3.5;
+      const speed = Math.random() * 7 + 3;
       sparksRef.current.push({
         x: cx,
         y: cy,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - (Math.random() * 2 + 1), // slightly upward bias
-        size: Math.random() * 2.5 + 1.2,
+        vy: Math.sin(angle) * speed - (Math.random() * 2 + 0.5),
+        size: Math.random() * 2.2 + 1,
         alpha: 1,
-        decay: Math.random() * 0.025 + 0.015,
+        decay: Math.random() * 0.024 + 0.016,
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
 
-    // Generate electric arc crackle across the blade
+    // 3. Crackling electric lightning arc along the sword axis
     const points: { x: number; y: number }[] = [];
-    const arcLength = canvas.height * 0.7;
-    const startY = canvas.height * 0.15;
-    const steps = 14;
+    const arcLength = h * 0.65;
+    const startY = h * 0.18;
+    const steps = 12;
 
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
       const y = startY + t * arcLength;
-      const jitter = (Math.random() - 0.5) * (t > 0.3 && t < 0.7 ? 24 : 8);
+      const jitter = (Math.random() - 0.5) * (t > 0.25 && t < 0.75 ? 18 : 6);
       points.push({ x: cx + jitter, y });
     }
     arcsRef.current.push({ points, alpha: 1 });
@@ -91,7 +125,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
   // Cinematic Sword Piercing Strike
   const strikeSword = useCallback(() => {
     playSwordStrikeSound();
-    triggerCanvasBurst(65);
+    triggerCanvasBurst();
     setStrikeCount((c) => c + 1);
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -104,8 +138,6 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       transformOrigin: "top center",
     })
       .set(".strike-burst", { scale: 0, opacity: 0 })
-      .set(".strike-ring-1", { scale: 0.1, opacity: 0 })
-      .set(".strike-ring-2", { scale: 0.1, opacity: 0 })
       .set(".horizontal-beam-left", { scaleX: 0, opacity: 0, transformOrigin: "right center" })
       .set(".horizontal-beam-right", { scaleX: 0, opacity: 0, transformOrigin: "left center" });
 
@@ -114,69 +146,51 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       y: 0,
       scaleY: 1,
       opacity: 1,
-      duration: 0.32,
+      duration: 0.3,
       ease: "power4.in",
     })
-      // Step 2: Instant IMPACT: Multi-layer shockwave rings + camera shake
+      // Step 2: Instant IMPACT: Central flare flash & subtle tactile shake
       .to(".strike-burst", {
-        scale: 1.6,
+        scale: 1.4,
         opacity: 1,
         duration: 0.08,
         ease: "power2.out",
       })
-      .to(".strike-ring-1", {
-        scale: 3.2,
-        opacity: 0.9,
-        duration: 0.65,
-        ease: "expo.out",
-      }, "<")
-      .to(".strike-ring-2", {
-        scale: 4.0,
-        opacity: 0.7,
-        duration: 0.8,
-        ease: "power2.out",
-      }, "<0.05")
-      // Subtle impact shake on the emblem
       .to(logoWrapperRef.current, {
-        x: "+=3",
-        y: "-=2",
-        duration: 0.04,
+        x: "+=2.5",
+        y: "-=1.5",
+        duration: 0.035,
         yoyo: true,
         repeat: 3,
         ease: "none",
       }, "<")
-      // Dissipate shockwaves
-      .to([".strike-ring-1", ".strike-ring-2"], {
-        opacity: 0,
-        duration: 0.35,
-      }, "-=0.25")
       .to(".strike-burst", {
-        scale: 0.6,
+        scale: 0.4,
         opacity: 0,
         duration: 0.2,
-      }, "-=0.3")
+      }, "+=0.05")
 
       // Step 3: Horizontal electrical discharge across the letters
       .to([".horizontal-beam-left", ".horizontal-beam-right"], {
         scaleX: 1,
         opacity: 1,
-        duration: 0.36,
+        duration: 0.35,
         ease: "power2.out",
-      }, "-=0.35")
+      }, "-=0.25")
       .to([".horizontal-beam-left", ".horizontal-beam-right"], {
         opacity: 0,
-        duration: 0.3,
-      }, "+=0.08")
+        duration: 0.25,
+      }, "+=0.05")
 
       // Step 4: Emblem surges with brilliant neon luminescence then settles
       .to(logoWrapperRef.current, {
-        filter: "brightness(1.65) drop-shadow(0 0 55px rgba(59,158,255,0.95)) drop-shadow(0 0 20px #ffffff)",
+        filter: "brightness(1.6) drop-shadow(0 0 50px rgba(59,158,255,0.9)) drop-shadow(0 0 20px #ffffff)",
         duration: 0.12,
         ease: "power2.out",
-      }, "-=0.55")
+      }, "-=0.45")
       .to(logoWrapperRef.current, {
         filter: "brightness(1) drop-shadow(0 0 28px rgba(59,158,255,0.35))",
-        duration: 0.9,
+        duration: 0.85,
         ease: "power2.inOut",
       });
   }, [triggerCanvasBurst]);
@@ -192,23 +206,27 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       if (!canvas || !emblemContainerRef.current) return;
       const rect = emblemContainerRef.current.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      // Record logical dimensions
+      dimsRef.current = { w: rect.width, h: rect.height };
+
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      // Absolute transform reset prevents cumulative scale errors
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
     // Initialize ambient embers around the sword
-    const w = emblemContainerRef.current?.clientWidth || 600;
-    const h = emblemContainerRef.current?.clientHeight || 340;
-    embersRef.current = Array.from({ length: 24 }, () => ({
-      x: w * 0.5 + (Math.random() - 0.5) * (w * 0.5),
+    const { w, h } = dimsRef.current;
+    embersRef.current = Array.from({ length: 20 }, () => ({
+      x: w * 0.5 + (Math.random() - 0.5) * (w * 0.45),
       y: h * 0.5 + (Math.random() - 0.5) * (h * 0.4),
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: -(Math.random() * 0.45 + 0.2),
-      size: Math.random() * 1.8 + 0.8,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -(Math.random() * 0.4 + 0.15),
+      size: Math.random() * 1.6 + 0.8,
       alpha: Math.random() * 0.5 + 0.2,
       pulseSpeed: Math.random() * 0.04 + 0.02,
       phase: Math.random() * Math.PI * 2,
@@ -221,8 +239,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       if (!running) return;
       frame++;
 
-      const containerW = emblemContainerRef.current?.clientWidth || 600;
-      const containerH = emblemContainerRef.current?.clientHeight || 340;
+      const { w: containerW, h: containerH } = dimsRef.current;
 
       ctx.clearRect(0, 0, containerW, containerH);
 
@@ -234,16 +251,34 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         sheenRef.current.style.transform = `rotateX(${currentTiltRef.current.x}deg) rotateY(${currentTiltRef.current.y}deg)`;
       }
 
-      // 1. Draw Ambient Floating Embers
+      // 1. Draw Centered Shockwaves
+      shockwavesRef.current = shockwavesRef.current.filter((sw) => sw.alpha > 0.015);
+      shockwavesRef.current.forEach((sw) => {
+        sw.radius += (sw.maxRadius - sw.radius) * 0.12 + 1.5;
+        sw.alpha *= 0.91;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = sw.color;
+        ctx.globalAlpha = Math.max(0, sw.alpha);
+        ctx.lineWidth = sw.lineWidth;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = sw.color;
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // 2. Draw Ambient Floating Embers
       embersRef.current.forEach((ember) => {
         ember.phase += ember.pulseSpeed;
         ember.y += ember.vy;
-        ember.x += ember.vx + Math.sin(ember.phase) * 0.3;
+        ember.x += ember.vx + Math.sin(ember.phase) * 0.25;
 
         // Wrap around
         if (ember.y < 10) {
           ember.y = containerH - 10;
-          ember.x = containerW * 0.5 + (Math.random() - 0.5) * (containerW * 0.45);
+          ember.x = containerW * 0.5 + (Math.random() - 0.5) * (containerW * 0.4);
         }
 
         const currentAlpha = Math.max(0, Math.sin(ember.phase) * 0.35 + ember.alpha);
@@ -258,12 +293,12 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         ctx.restore();
       });
 
-      // 2. Draw Dynamic Explosive Sparks
+      // 3. Draw Dynamic Explosive Sparks
       sparksRef.current = sparksRef.current.filter((spark) => spark.alpha > 0.02);
       sparksRef.current.forEach((spark) => {
         spark.x += spark.vx;
         spark.y += spark.vy;
-        spark.vy += 0.12; // gentle gravity
+        spark.vy += 0.1; // gravity
         spark.vx *= 0.96; // air drag
         spark.alpha -= spark.decay;
 
@@ -278,10 +313,10 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         ctx.restore();
       });
 
-      // 3. Draw Electric Arc Discharges
+      // 4. Draw Electric Arc Discharges
       arcsRef.current = arcsRef.current.filter((arc) => arc.alpha > 0.05);
       arcsRef.current.forEach((arc) => {
-        arc.alpha -= 0.08;
+        arc.alpha -= 0.09;
 
         if (arc.points.length > 1) {
           ctx.save();
@@ -296,7 +331,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
           ctx.shadowColor = "#3b9eff";
           ctx.stroke();
 
-          // Core bright thread
+          // Core bright white filament
           ctx.strokeStyle = `rgba(255, 255, 255, ${arc.alpha * 0.9})`;
           ctx.lineWidth = 0.8;
           ctx.stroke();
@@ -304,8 +339,8 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         }
       });
 
-      // 4. Occasional spontaneous electric micro-discharge (every ~180 frames)
-      if (frame % 240 === 0 && Math.random() > 0.3) {
+      // 5. Periodic spontaneous electric micro-discharge (every ~260 frames)
+      if (frame % 260 === 0 && Math.random() > 0.35) {
         const cx = containerW * 0.5;
         const cy = containerH * 0.5;
         const pts = [];
@@ -313,11 +348,11 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         for (let i = 0; i <= steps; i++) {
           const t = (i / steps) - 0.5;
           pts.push({
-            x: cx + (Math.random() - 0.5) * 16,
-            y: cy + t * (containerH * 0.35),
+            x: cx + (Math.random() - 0.5) * 14,
+            y: cy + t * (containerH * 0.32),
           });
         }
-        arcsRef.current.push({ points: pts, alpha: 0.75 });
+        arcsRef.current.push({ points: pts, alpha: 0.7 });
       }
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -374,10 +409,10 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
 
-    // Target tilt angles: -12 to +12 degrees
+    // Target tilt angles: -14 to +14 degrees
     targetTiltRef.current = {
-      x: (y - 0.5) * -16,
-      y: (x - 0.5) * 16,
+      x: (y - 0.5) * -14,
+      y: (x - 0.5) * 14,
     };
 
     setMousePos({ x: x * 100, y: y * 100 });
@@ -396,16 +431,16 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
     >
       {/* Dynamic ambient center backlight */}
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[950px] h-[600px] opacity-40 blur-3xl transition-opacity duration-700"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[900px] h-[550px] opacity-40 blur-3xl transition-opacity duration-700"
         style={{
           background:
-            "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(59,158,255,0.28) 0%, rgba(59,158,255,0.08) 50%, transparent 80%)",
+            "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(59,158,255,0.26) 0%, rgba(59,158,255,0.06) 50%, transparent 80%)",
         }}
       />
 
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center text-center gap-7">
-        {/* Status pill with animated radar beacon */}
-        <div className="hero-anim-item inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs text-white/70 backdrop-blur-md shadow-[0_0_15px_rgba(59,158,255,0.15)]">
+        {/* Status pill with animated beacon */}
+        <div className="hero-anim-item inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs text-white/70 backdrop-blur-md shadow-[0_0_15px_rgba(59,158,255,0.12)]">
           <span className="relative flex size-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3b9eff] opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-[#3b9eff]" />
@@ -424,33 +459,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
           style={{ perspective: "1200px" }}
           title="Click to strike the blade"
         >
-          {/* Layer 1: Ambient Celestial Cyber Gyroscope / Radar Rings (Layered depth behind emblem) */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-20 w-[420px] h-[420px] md:w-[500px] md:h-[500px]">
-            {/* Outer Slow Orbit (Clockwise 45s) */}
-            <div
-              className="absolute inset-0 rounded-full border border-dashed border-[#3b9eff]/20 animate-[spin_45s_linear_infinite]"
-              style={{
-                boxShadow: "inset 0 0 35px rgba(59,158,255,0.06)",
-              }}
-            >
-              {/* Cardinal Reticle Pips */}
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 size-2 rounded-full bg-[#3b9eff]/60 shadow-[0_0_8px_#3b9eff]" />
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 size-2 rounded-full bg-[#3b9eff]/60 shadow-[0_0_8px_#3b9eff]" />
-              <div className="absolute top-1/2 -left-1 -translate-y-1/2 size-2 rounded-full bg-[#3b9eff]/60 shadow-[0_0_8px_#3b9eff]" />
-              <div className="absolute top-1/2 -right-1 -translate-y-1/2 size-2 rounded-full bg-[#3b9eff]/60 shadow-[0_0_8px_#3b9eff]" />
-            </div>
-
-            {/* Inner Counter Orbit (Counter-Clockwise 65s) */}
-            <div className="absolute inset-10 rounded-full border border-dotted border-white/10 animate-[spin_65s_linear_infinite_reverse]">
-              <div className="absolute top-0 right-1/4 size-1.5 rounded-full bg-white/40" />
-              <div className="absolute bottom-0 left-1/4 size-1.5 rounded-full bg-white/40" />
-            </div>
-
-            {/* Center Pulse Core */}
-            <div className="absolute inset-24 rounded-full border border-[#3b9eff]/20 animate-pulse opacity-40" />
-          </div>
-
-          {/* Layer 2: 3D Interactive Tilting Emblem Wrapper */}
+          {/* 3D Interactive Tilting Emblem Wrapper */}
           <div
             ref={sheenRef}
             className="relative w-full flex items-center justify-center transition-transform duration-100 ease-out will-change-transform"
@@ -460,8 +469,8 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
             <div
               className="pointer-events-none absolute inset-0 -z-10 transition-opacity duration-300"
               style={{
-                opacity: isHovered ? 0.7 : 0,
-                background: `radial-gradient(circle 280px at ${mousePos.x}% ${mousePos.y}%, rgba(59,158,255,0.4) 0%, rgba(59,158,255,0.08) 50%, transparent 75%)`,
+                opacity: isHovered ? 0.65 : 0,
+                background: `radial-gradient(circle 280px at ${mousePos.x}% ${mousePos.y}%, rgba(59,158,255,0.38) 0%, rgba(59,158,255,0.08) 50%, transparent 75%)`,
                 mixBlendMode: "screen",
               }}
             />
@@ -514,7 +523,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                 x2="417.5"
                 y2="228.5"
                 stroke="#3b9eff"
-                strokeWidth="3"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 filter="drop-shadow(0 0 10px #3b9eff)"
               />
@@ -525,7 +534,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                 x2="765"
                 y2="228.5"
                 stroke="#3b9eff"
-                strokeWidth="3"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 filter="drop-shadow(0 0 10px #3b9eff)"
               />
@@ -535,30 +544,8 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                 className="strike-burst"
                 cx="417.5"
                 cy="228.5"
-                r="50"
+                r="45"
                 fill="url(#impactGlow)"
-              />
-
-              {/* Concentric Impact Shockwaves */}
-              <circle
-                className="strike-ring-1"
-                cx="417.5"
-                cy="228.5"
-                r="65"
-                stroke="#3b9eff"
-                strokeWidth="2.5"
-                fill="none"
-                filter="drop-shadow(0 0 16px #3b9eff)"
-              />
-              <circle
-                className="strike-ring-2"
-                cx="417.5"
-                cy="228.5"
-                r="95"
-                stroke="#ffffff"
-                strokeWidth="1.5"
-                fill="none"
-                filter="drop-shadow(0 0 10px #ffffff)"
               />
 
               {/* Gradients */}
@@ -593,7 +580,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
               />
             </div>
 
-            {/* Layer 3: Interactive Physics Canvas for Flying Sparks & Electric Arcs */}
+            {/* Centered Physics Canvas for Expanding Shockwaves, Sparks & Electric Arcs */}
             <canvas
               ref={canvasRef}
               className="pointer-events-none absolute inset-0 h-full w-full z-30"
@@ -616,7 +603,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         <div className="hero-anim-item max-w-2xl mt-1">
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold text-white leading-tight tracking-tight">
             One event.{" "}
-            <span className="bg-gradient-to-r from-[#3b9eff] via-[#93c5fd] to-[#3b9eff] bg-clip-text text-transparent animate-pulse">
+            <span className="bg-gradient-to-r from-[#3b9eff] via-[#93c5fd] to-[#3b9eff] bg-clip-text text-transparent">
               Two disciplines.
             </span>
           </h1>
