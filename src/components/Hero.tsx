@@ -5,7 +5,7 @@ import Image from "next/image";
 import { gsap } from "@/lib/gsap";
 import { scrollTo } from "@/lib/lenis";
 import { playTactileClick, playSwordStrikeSound } from "@/lib/audio";
-import { ArrowDown, Zap } from "lucide-react";
+import { ArrowRight, ChevronDown, Zap, MessageSquare, Shield } from "lucide-react";
 
 interface Spark {
   x: number;
@@ -43,12 +43,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
   const emblemContainerRef = useRef<HTMLDivElement>(null);
   const logoWrapperRef = useRef<HTMLDivElement>(null);
-  const sheenRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
-  const [isHovered, setIsHovered] = useState(false);
-  const [strikeCount, setStrikeCount] = useState(0);
 
   // Logical container dimensions for rock-solid coordinate math
   const dimsRef = useRef({ w: 600, h: 330 });
@@ -58,8 +53,6 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
   const embersRef = useRef<Ember[]>([]);
   const shockwavesRef = useRef<Shockwave[]>([]);
   const arcsRef = useRef<{ points: { x: number; y: number }[]; alpha: number }[]>([]);
-  const targetTiltRef = useRef({ x: 0, y: 0 });
-  const currentTiltRef = useRef({ x: 0, y: 0 });
   const animFrameRef = useRef<number | null>(null);
 
   // Trigger high-velocity spark explosion and centered shockwaves on canvas
@@ -126,7 +119,6 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
   const strikeSword = useCallback(() => {
     playSwordStrikeSound();
     triggerCanvasBurst();
-    setStrikeCount((c) => c + 1);
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -157,8 +149,8 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         ease: "power2.out",
       })
       .to(logoWrapperRef.current, {
-        x: "+=2.5",
-        y: "-=1.5",
+        x: "+=2",
+        y: "-=1",
         duration: 0.035,
         yoyo: true,
         repeat: 3,
@@ -182,9 +174,9 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         duration: 0.25,
       }, "+=0.05")
 
-      // Step 4: Emblem surges with brilliant neon luminescence then settles
+      // Step 4: Emblem surges with brilliant luminescence then settles seamlessly
       .to(logoWrapperRef.current, {
-        filter: "brightness(1.6) drop-shadow(0 0 50px rgba(59,158,255,0.9)) drop-shadow(0 0 20px #ffffff)",
+        filter: "brightness(1.5) drop-shadow(0 0 45px rgba(59,158,255,0.85)) drop-shadow(0 0 15px rgba(255,255,255,0.8))",
         duration: 0.12,
         ease: "power2.out",
       }, "-=0.45")
@@ -221,14 +213,14 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
 
     // Initialize ambient embers around the sword
     const { w, h } = dimsRef.current;
-    embersRef.current = Array.from({ length: 20 }, () => ({
+    embersRef.current = Array.from({ length: 18 }, () => ({
       x: w * 0.5 + (Math.random() - 0.5) * (w * 0.45),
       y: h * 0.5 + (Math.random() - 0.5) * (h * 0.4),
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: -(Math.random() * 0.4 + 0.15),
-      size: Math.random() * 1.6 + 0.8,
-      alpha: Math.random() * 0.5 + 0.2,
-      pulseSpeed: Math.random() * 0.04 + 0.02,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: -(Math.random() * 0.35 + 0.15),
+      size: Math.random() * 1.5 + 0.7,
+      alpha: Math.random() * 0.45 + 0.15,
+      pulseSpeed: Math.random() * 0.035 + 0.015,
       phase: Math.random() * Math.PI * 2,
     }));
 
@@ -242,14 +234,6 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       const { w: containerW, h: containerH } = dimsRef.current;
 
       ctx.clearRect(0, 0, containerW, containerH);
-
-      // Smooth tilt interpolation (lerp)
-      currentTiltRef.current.x += (targetTiltRef.current.x - currentTiltRef.current.x) * 0.12;
-      currentTiltRef.current.y += (targetTiltRef.current.y - currentTiltRef.current.y) * 0.12;
-
-      if (sheenRef.current) {
-        sheenRef.current.style.transform = `rotateX(${currentTiltRef.current.x}deg) rotateY(${currentTiltRef.current.y}deg)`;
-      }
 
       // 1. Draw Centered Shockwaves
       shockwavesRef.current = shockwavesRef.current.filter((sw) => sw.alpha > 0.015);
@@ -273,7 +257,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       embersRef.current.forEach((ember) => {
         ember.phase += ember.pulseSpeed;
         ember.y += ember.vy;
-        ember.x += ember.vx + Math.sin(ember.phase) * 0.25;
+        ember.x += ember.vx + Math.sin(ember.phase) * 0.2;
 
         // Wrap around
         if (ember.y < 10) {
@@ -281,13 +265,13 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
           ember.x = containerW * 0.5 + (Math.random() - 0.5) * (containerW * 0.4);
         }
 
-        const currentAlpha = Math.max(0, Math.sin(ember.phase) * 0.35 + ember.alpha);
+        const currentAlpha = Math.max(0, Math.sin(ember.phase) * 0.3 + ember.alpha);
 
         ctx.save();
         ctx.beginPath();
         ctx.arc(ember.x, ember.y, ember.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(96, 165, 250, ${currentAlpha})`;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = "#3b9eff";
         ctx.fill();
         ctx.restore();
@@ -298,7 +282,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       sparksRef.current.forEach((spark) => {
         spark.x += spark.vx;
         spark.y += spark.vy;
-        spark.vy += 0.1; // gravity
+        spark.vy += 0.09; // gentle gravity
         spark.vx *= 0.96; // air drag
         spark.alpha -= spark.decay;
 
@@ -307,7 +291,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
         ctx.arc(spark.x, spark.y, spark.size, 0, Math.PI * 2);
         ctx.fillStyle = spark.color;
         ctx.globalAlpha = Math.max(0, spark.alpha);
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 8;
         ctx.shadowColor = spark.color;
         ctx.fill();
         ctx.restore();
@@ -326,33 +310,33 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
             ctx.lineTo(arc.points[i].x, arc.points[i].y);
           }
           ctx.strokeStyle = `rgba(147, 197, 253, ${arc.alpha})`;
-          ctx.lineWidth = 1.8;
-          ctx.shadowBlur = 12;
+          ctx.lineWidth = 1.6;
+          ctx.shadowBlur = 10;
           ctx.shadowColor = "#3b9eff";
           ctx.stroke();
 
           // Core bright white filament
           ctx.strokeStyle = `rgba(255, 255, 255, ${arc.alpha * 0.9})`;
-          ctx.lineWidth = 0.8;
+          ctx.lineWidth = 0.7;
           ctx.stroke();
           ctx.restore();
         }
       });
 
       // 5. Periodic spontaneous electric micro-discharge (every ~260 frames)
-      if (frame % 260 === 0 && Math.random() > 0.35) {
+      if (frame % 260 === 0 && Math.random() > 0.4) {
         const cx = containerW * 0.5;
         const cy = containerH * 0.5;
         const pts = [];
-        const steps = 7;
+        const steps = 6;
         for (let i = 0; i <= steps; i++) {
           const t = (i / steps) - 0.5;
           pts.push({
-            x: cx + (Math.random() - 0.5) * 14,
-            y: cy + t * (containerH * 0.32),
+            x: cx + (Math.random() - 0.5) * 12,
+            y: cy + t * (containerH * 0.3),
           });
         }
-        arcsRef.current.push({ points: pts, alpha: 0.7 });
+        arcsRef.current.push({ points: pts, alpha: 0.65 });
       }
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -375,21 +359,21 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
       // Hero elements entrance
       gsap.fromTo(
         ".hero-anim-item",
-        { opacity: 0, y: 22 },
-        { opacity: 1, y: 0, duration: 0.8, stagger: 0.12, ease: "power3.out", delay: 0.1 }
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power3.out", delay: 0.1 }
       );
 
       // Trigger the sword strike after initial reveal
       const timer = setTimeout(() => {
         strikeSword();
-      }, 450);
+      }, 400);
 
       // Sweeping heartbeat glint across the letters every 6.5s
       const pulseInterval = setInterval(() => {
         gsap.fromTo(
           ".heartbeat-glow-line",
           { x: "-120%", opacity: 0 },
-          { x: "120%", opacity: 0.8, duration: 1.4, ease: "power2.inOut" }
+          { x: "120%", opacity: 0.6, duration: 1.4, ease: "power2.inOut" }
         );
       }, 6500);
 
@@ -402,79 +386,38 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
     return () => ctx.revert();
   }, [ready, strikeSword]);
 
-  // Smooth 3D mouse parallax and specular light sheen
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!emblemContainerRef.current) return;
-    const rect = emblemContainerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-
-    // Target tilt angles: -14 to +14 degrees
-    targetTiltRef.current = {
-      x: (y - 0.5) * -14,
-      y: (x - 0.5) * 14,
-    };
-
-    setMousePos({ x: x * 100, y: y * 100 });
-  };
-
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    targetTiltRef.current = { x: 0, y: 0 };
-  };
-
   return (
     <section
       ref={rootRef}
       className="relative flex min-h-screen flex-col items-center justify-center px-6 pt-24 pb-16 md:px-10 overflow-hidden select-none"
     >
-      {/* Dynamic ambient center backlight */}
+      {/* Soft Gaussian ambient center aura - completely blended with zero hard edges */}
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[900px] h-[550px] opacity-40 blur-3xl transition-opacity duration-700"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[750px] h-[480px] opacity-35 blur-3xl"
         style={{
           background:
-            "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(59,158,255,0.26) 0%, rgba(59,158,255,0.06) 50%, transparent 80%)",
+            "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(59,158,255,0.22) 0%, rgba(59,158,255,0.04) 55%, transparent 75%)",
         }}
       />
 
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center text-center gap-7">
-        {/* Status pill with animated beacon */}
-        <div className="hero-anim-item inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs text-white/70 backdrop-blur-md shadow-[0_0_15px_rgba(59,158,255,0.12)]">
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3b9eff] opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-[#3b9eff]" />
+        {/* Minimalist status badge */}
+        <div className="hero-anim-item inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1 text-xs text-white/60 backdrop-blur-md">
+          <span className="size-1.5 rounded-full bg-[#3b9eff] animate-pulse" />
+          <span className="font-mono tracking-wider uppercase text-[11px]">
+            Registration Open · Dates TBA
           </span>
-          <span className="font-mono tracking-wide">OPERATIONAL SYSTEM ONLINE · DATES TBA</span>
         </div>
 
-        {/* Cinematic Emblem Centerpiece with Sword Piercing & Canvas Particle FX */}
+        {/* Seamlessly Blended Emblem Centerpiece */}
         <div
           ref={emblemContainerRef}
-          onMouseMove={handleMouseMove}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
           onClick={strikeSword}
-          className="hero-anim-item group relative w-full max-w-2xl px-2 my-2 cursor-pointer"
-          style={{ perspective: "1200px" }}
+          className="hero-anim-item group relative w-full max-w-2xl px-2 my-1 cursor-pointer transition-transform duration-300 hover:scale-[1.01]"
           title="Click to strike the blade"
         >
-          {/* 3D Interactive Tilting Emblem Wrapper */}
-          <div
-            ref={sheenRef}
-            className="relative w-full flex items-center justify-center transition-transform duration-100 ease-out will-change-transform"
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            {/* Interactive specular flashlight effect on hover */}
-            <div
-              className="pointer-events-none absolute inset-0 -z-10 transition-opacity duration-300"
-              style={{
-                opacity: isHovered ? 0.65 : 0,
-                background: `radial-gradient(circle 280px at ${mousePos.x}% ${mousePos.y}%, rgba(59,158,255,0.38) 0%, rgba(59,158,255,0.08) 50%, transparent 75%)`,
-                mixBlendMode: "screen",
-              }}
-            />
-
+          {/* Frameless Emblem Wrapper */}
+          <div className="relative w-full flex items-center justify-center">
             {/* Piercing Energy Sword Laser SVG Overlay */}
             <svg
               className="pointer-events-none absolute inset-0 h-full w-full z-20 overflow-visible"
@@ -491,9 +434,9 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                   x2="417.5"
                   y2="228.5"
                   stroke="#3b9eff"
-                  strokeWidth="5"
+                  strokeWidth="4"
                   strokeLinecap="round"
-                  filter="drop-shadow(0 0 14px #3b9eff)"
+                  filter="drop-shadow(0 0 12px #3b9eff)"
                   opacity="0.95"
                 />
                 {/* Core diamond white laser */}
@@ -503,15 +446,15 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                   x2="417.5"
                   y2="228.5"
                   stroke="#ffffff"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   filter="drop-shadow(0 0 6px #ffffff)"
                 />
                 {/* Piercing Spearhead Tip */}
                 <polygon
-                  points="417.5,238 412,220 423,220"
+                  points="417.5,236 413,222 422,222"
                   fill="#ffffff"
-                  filter="drop-shadow(0 0 10px #3b9eff)"
+                  filter="drop-shadow(0 0 8px #3b9eff)"
                 />
               </g>
 
@@ -523,9 +466,9 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                 x2="417.5"
                 y2="228.5"
                 stroke="#3b9eff"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
-                filter="drop-shadow(0 0 10px #3b9eff)"
+                filter="drop-shadow(0 0 8px #3b9eff)"
               />
               <line
                 className="horizontal-beam-right"
@@ -534,9 +477,9 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                 x2="765"
                 y2="228.5"
                 stroke="#3b9eff"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
-                filter="drop-shadow(0 0 10px #3b9eff)"
+                filter="drop-shadow(0 0 8px #3b9eff)"
               />
 
               {/* Center Impact Flash Starburst */}
@@ -544,7 +487,7 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
                 className="strike-burst"
                 cx="417.5"
                 cy="228.5"
-                r="45"
+                r="40"
                 fill="url(#impactGlow)"
               />
 
@@ -552,30 +495,36 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
               <defs>
                 <radialGradient id="impactGlow" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-                  <stop offset="35%" stopColor="#60a5fa" stopOpacity="0.85" />
-                  <stop offset="70%" stopColor="#3b9eff" stopOpacity="0.4" />
+                  <stop offset="40%" stopColor="#60a5fa" stopOpacity="0.8" />
                   <stop offset="100%" stopColor="#3b9eff" stopOpacity="0" />
                 </radialGradient>
               </defs>
             </svg>
 
-            {/* Seamless Transparent Logo Artwork */}
-            <div ref={logoWrapperRef} className="relative w-full overflow-hidden transition-all duration-300">
+            {/* Seamless Transparent Logo Artwork - completely feathered at boundaries */}
+            <div
+              ref={logoWrapperRef}
+              className="relative w-full overflow-hidden transition-all duration-300"
+              style={{
+                maskImage: "radial-gradient(ellipse 90% 80% at 50% 50%, black 50%, transparent 95%)",
+                WebkitMaskImage: "radial-gradient(ellipse 90% 80% at 50% 50%, black 50%, transparent 95%)",
+              }}
+            >
               <Image
                 src="/anesthesia-logo.png"
                 alt="ANESTHESIA"
                 width={835}
                 height={457}
                 priority
-                className="w-full object-contain pointer-events-none select-none drop-shadow-[0_0_28px_rgba(59,158,255,0.35)]"
+                className="w-full object-contain pointer-events-none select-none drop-shadow-[0_0_24px_rgba(59,158,255,0.3)]"
               />
 
               {/* Sweeping Heartbeat Glint Wave */}
               <div
-                className="heartbeat-glow-line pointer-events-none absolute inset-y-0 w-36 -skew-x-12 opacity-0"
+                className="heartbeat-glow-line pointer-events-none absolute inset-y-0 w-32 -skew-x-12 opacity-0"
                 style={{
                   background:
-                    "linear-gradient(90deg, transparent 0%, rgba(59,158,255,0.45) 50%, transparent 100%)",
+                    "linear-gradient(90deg, transparent 0%, rgba(59,158,255,0.35) 50%, transparent 100%)",
                 }}
               />
             </div>
@@ -587,23 +536,18 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
             />
           </div>
 
-          {/* Interactive cue with strike counter */}
-          <div className="mt-3 flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest uppercase text-white/40 group-hover:text-[#3b9eff] transition-all">
-            <Zap className="size-3 text-[#3b9eff] animate-pulse" />
-            <span>Click emblem to strike the blade</span>
-            {strikeCount > 0 && (
-              <span className="rounded bg-[#3b9eff]/15 px-1.5 py-0.5 text-[9px] text-[#3b9eff]">
-                +{strikeCount}
-              </span>
-            )}
+          {/* Understated cue */}
+          <div className="mt-2 flex items-center justify-center gap-1.5 font-mono text-[10px] tracking-widest uppercase text-white/30 group-hover:text-[#3b9eff] transition-colors">
+            <Zap className="size-3 text-[#3b9eff]" />
+            <span>Click to strike</span>
           </div>
         </div>
 
-        {/* Headline with dynamic shimmer */}
+        {/* Clean, authentic typography */}
         <div className="hero-anim-item max-w-2xl mt-1">
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold text-white leading-tight tracking-tight">
             One event.{" "}
-            <span className="bg-gradient-to-r from-[#3b9eff] via-[#93c5fd] to-[#3b9eff] bg-clip-text text-transparent">
+            <span className="text-[#3b9eff]">
               Two disciplines.
             </span>
           </h1>
@@ -612,40 +556,41 @@ export default function Hero({ ready = true }: { ready?: boolean }) {
           </p>
         </div>
 
-        {/* CTAs */}
+        {/* CTAs using Lucide icons */}
         <div className="hero-anim-item flex flex-wrap items-center justify-center gap-3 mt-1">
           <button
             onClick={() => {
               playTactileClick();
               scrollTo("#register");
             }}
-            className="group relative inline-flex items-center gap-2 rounded-full bg-[#3b9eff] px-8 py-3.5 text-sm font-semibold text-[#06070a] hover:bg-white transition-all duration-200 shadow-[0_0_24px_rgba(59,158,255,0.4)] hover:shadow-[0_0_36px_rgba(59,158,255,0.6)]"
+            className="group relative inline-flex items-center gap-2.5 rounded-full bg-[#3b9eff] px-8 py-3.5 text-sm font-semibold text-[#06070a] hover:bg-white transition-all duration-200 shadow-[0_0_24px_rgba(59,158,255,0.35)] hover:shadow-[0_0_36px_rgba(59,158,255,0.55)]"
           >
             <span>Register Free</span>
-            <span className="font-mono text-sm transition-transform duration-200 group-hover:translate-x-1">→</span>
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
           </button>
           <a
             href="https://discord.gg/Q2Z5FSxTG4"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => playTactileClick()}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 px-8 py-3.5 text-sm text-white/70 hover:text-white hover:border-white/30 transition-all duration-200 backdrop-blur-sm hover:bg-white/[0.04]"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 px-7 py-3.5 text-sm text-white/70 hover:text-white hover:border-white/30 transition-all duration-200 backdrop-blur-sm hover:bg-white/[0.04]"
           >
-            Join Discord
+            <MessageSquare className="size-4 text-[#3b9eff]" />
+            <span>Join Discord</span>
           </a>
         </div>
 
-        {/* Scroll cue */}
+        {/* Scroll cue using Lucide ChevronDown */}
         <button
           onClick={() => {
             playTactileClick();
             scrollTo("#about");
           }}
-          className="hero-anim-item mt-3 flex flex-col items-center gap-1.5 text-white/25 hover:text-white/60 transition-colors duration-200"
+          className="hero-anim-item mt-2 flex flex-col items-center gap-1 text-white/25 hover:text-white/60 transition-colors duration-200"
           aria-label="Scroll down"
         >
-          <span className="text-[11px] tracking-widest uppercase font-mono">Scroll to explore</span>
-          <ArrowDown className="size-3.5 animate-bounce" />
+          <span className="text-[10px] tracking-widest uppercase font-mono">Explore</span>
+          <ChevronDown className="size-3.5 animate-bounce" />
         </button>
       </div>
     </section>

@@ -13,6 +13,10 @@ import {
   ArrowUpRight,
   UserPlus,
   Users,
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  KeyRound,
 } from "lucide-react";
 
 type RegForm = {
@@ -546,7 +550,10 @@ export default function Register() {
                             className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm font-mono text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                           />
                           {errors.teamName && (
-                            <p className="mt-2 text-xs text-red-400 font-mono">{errors.teamName}</p>
+                            <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                              <AlertCircle className="size-3.5 shrink-0" />
+                              <span>{errors.teamName}</span>
+                            </p>
                           )}
                         </div>
 
@@ -594,7 +601,10 @@ export default function Register() {
                             className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                           />
                           {errors.leader && (
-                            <p className="mt-2 text-xs text-red-400 font-mono">{errors.leader}</p>
+                            <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                              <AlertCircle className="size-3.5 shrink-0" />
+                              <span>{errors.leader}</span>
+                            </p>
                           )}
                         </div>
 
@@ -611,7 +621,10 @@ export default function Register() {
                               className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                             />
                             {errors.email && (
-                              <p className="mt-2 text-xs text-red-400 font-mono">{errors.email}</p>
+                              <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                                <AlertCircle className="size-3.5 shrink-0" />
+                                <span>{errors.email}</span>
+                              </p>
                             )}
                           </div>
                           <div>
@@ -626,7 +639,10 @@ export default function Register() {
                               className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                             />
                             {errors.phone && (
-                              <p className="mt-2 text-xs text-red-400 font-mono">{errors.phone}</p>
+                              <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                                <AlertCircle className="size-3.5 shrink-0" />
+                                <span>{errors.phone}</span>
+                              </p>
                             )}
                           </div>
                         </div>
@@ -642,7 +658,10 @@ export default function Register() {
                             className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                           />
                           {errors.college && (
-                            <p className="mt-2 text-xs text-red-400 font-mono">{errors.college}</p>
+                            <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                              <AlertCircle className="size-3.5 shrink-0" />
+                              <span>{errors.college}</span>
+                            </p>
                           )}
                         </div>
                       </div>
@@ -680,14 +699,18 @@ export default function Register() {
                           </span>
                         </label>
                         {errors.agree && (
-                          <p className="text-xs text-red-400 font-mono">{errors.agree}</p>
+                          <p className="text-xs text-red-400 font-mono flex items-center gap-1.5">
+                            <AlertCircle className="size-3.5 shrink-0" />
+                            <span>{errors.agree}</span>
+                          </p>
                         )}
                       </div>
                     )}
 
                     {errors.form && (
-                      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400 font-mono">
-                        {errors.form}
+                      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400 font-mono flex items-center gap-2">
+                        <AlertCircle className="size-4 shrink-0" />
+                        <span>{errors.form}</span>
                       </div>
                     )}
 
@@ -697,9 +720,10 @@ export default function Register() {
                         <button
                           type="button"
                           onClick={prev}
-                          className="text-xs font-mono uppercase tracking-wider text-white/50 hover:text-white transition-colors"
+                          className="text-xs font-mono uppercase tracking-wider text-white/50 hover:text-white transition-colors flex items-center gap-1.5"
                         >
-                          ← Back
+                          <ArrowRight className="size-3.5 rotate-180" />
+                          <span>Back</span>
                         </button>
                       ) : (
                         <div />
@@ -709,18 +733,20 @@ export default function Register() {
                         <button
                           type="button"
                           onClick={next}
-                          className="rounded-full bg-white px-7 py-3 text-xs font-semibold uppercase tracking-wider text-[#06070a] hover:bg-[#3b9eff] transition-colors"
+                          className="rounded-full bg-white px-7 py-3 text-xs font-semibold uppercase tracking-wider text-[#06070a] hover:bg-[#3b9eff] transition-colors flex items-center gap-2"
                         >
-                          Continue →
+                          <span>Continue</span>
+                          <ArrowRight className="size-3.5" />
                         </button>
                       ) : (
                         <button
                           type="button"
                           onClick={submitCreate}
                           disabled={busy}
-                          className="rounded-full bg-[#3b9eff] px-8 py-3 text-xs font-semibold uppercase tracking-wider text-[#06070a] hover:bg-white transition-colors disabled:opacity-50"
+                          className="rounded-full bg-[#3b9eff] px-8 py-3 text-xs font-semibold uppercase tracking-wider text-[#06070a] hover:bg-white transition-colors disabled:opacity-50 flex items-center gap-2"
                         >
-                          {busy ? "Registering…" : "Complete Registration →"}
+                          <span>{busy ? "Registering…" : "Complete Registration"}</span>
+                          <ArrowRight className="size-3.5" />
                         </button>
                       )}
                     </div>
@@ -759,19 +785,37 @@ export default function Register() {
                     </div>
 
                     {joinErrors.teamCode && (
-                      <p className="mt-2 text-xs text-red-400 font-mono">{joinErrors.teamCode}</p>
+                      <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{joinErrors.teamCode}</span>
+                      </p>
                     )}
 
                     {verifiedSquad && (
-                      <div className="mt-3 rounded-xl border border-[#3b9eff]/30 bg-[#3b9eff]/10 p-3.5 text-xs text-white/80 font-mono flex items-center justify-between">
-                        <div>
-                          <p className="text-white font-bold">{verifiedSquad.teamName}</p>
-                          <p className="text-white/50 text-[11px]">Leader: {verifiedSquad.leader}</p>
+                      <div className="mt-3 rounded-2xl border border-[#3b9eff]/30 bg-[#3b9eff]/[0.08] p-4 text-xs font-mono flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-8 items-center justify-center rounded-xl bg-[#3b9eff]/20 text-[#3b9eff]">
+                            <ShieldCheck className="size-4" />
+                          </div>
+                          <div>
+                            <p className="text-white font-bold">{verifiedSquad.teamName}</p>
+                            <p className="text-white/50 text-[11px]">Leader: {verifiedSquad.leader}</p>
+                          </div>
                         </div>
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 ${
                           verifiedSquad.isFull ? "bg-red-500/20 text-red-400" : "bg-[#3b9eff]/20 text-[#3b9eff]"
                         }`}>
-                          {verifiedSquad.isFull ? "Squad Full (2/2)" : "1 Open Slot"}
+                          {verifiedSquad.isFull ? (
+                            <>
+                              <AlertTriangle className="size-3" />
+                              <span>Squad Full (2/2)</span>
+                            </>
+                          ) : (
+                            <>
+                              <Users className="size-3" />
+                              <span>1 Open Slot</span>
+                            </>
+                          )}
                         </span>
                       </div>
                     )}
@@ -788,7 +832,10 @@ export default function Register() {
                       className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                     />
                     {joinErrors.name && (
-                      <p className="mt-2 text-xs text-red-400 font-mono">{joinErrors.name}</p>
+                      <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{joinErrors.name}</span>
+                      </p>
                     )}
                   </div>
 
@@ -805,7 +852,10 @@ export default function Register() {
                         className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                       />
                       {joinErrors.email && (
-                        <p className="mt-2 text-xs text-red-400 font-mono">{joinErrors.email}</p>
+                        <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                          <AlertCircle className="size-3.5 shrink-0" />
+                          <span>{joinErrors.email}</span>
+                        </p>
                       )}
                     </div>
                     <div>
@@ -820,7 +870,10 @@ export default function Register() {
                         className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                       />
                       {joinErrors.phone && (
-                        <p className="mt-2 text-xs text-red-400 font-mono">{joinErrors.phone}</p>
+                        <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                          <AlertCircle className="size-3.5 shrink-0" />
+                          <span>{joinErrors.phone}</span>
+                        </p>
                       )}
                     </div>
                   </div>
@@ -836,13 +889,17 @@ export default function Register() {
                       className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
                     />
                     {joinErrors.college && (
-                      <p className="mt-2 text-xs text-red-400 font-mono">{joinErrors.college}</p>
+                      <p className="mt-2 text-xs text-red-400 font-mono flex items-center gap-1.5">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{joinErrors.college}</span>
+                      </p>
                     )}
                   </div>
 
                   {joinErrors.form && (
-                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400 font-mono">
-                      {joinErrors.form}
+                    <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400 font-mono flex items-center gap-2">
+                      <AlertCircle className="size-4 shrink-0" />
+                      <span>{joinErrors.form}</span>
                     </div>
                   )}
 
@@ -850,9 +907,10 @@ export default function Register() {
                     <button
                       type="submit"
                       disabled={joinBusy || Boolean(verifiedSquad?.isFull)}
-                      className="rounded-full bg-[#3b9eff] px-8 py-3 text-xs font-semibold uppercase tracking-wider text-[#06070a] hover:bg-white transition-colors disabled:opacity-50"
+                      className="rounded-full bg-[#3b9eff] px-8 py-3 text-xs font-semibold uppercase tracking-wider text-[#06070a] hover:bg-white transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
-                      {joinBusy ? "Joining Squad…" : "Join Squad as Operator 2 →"}
+                      <span>{joinBusy ? "Joining Squad…" : "Join Squad as Operator 2"}</span>
+                      <ArrowRight className="size-3.5" />
                     </button>
                   </div>
                 </form>

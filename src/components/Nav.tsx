@@ -13,6 +13,8 @@ const LINKS = [
   { label: "FAQ", hash: "#faq" },
 ];
 
+import { MessageSquare } from "lucide-react";
+
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -67,7 +69,8 @@ export default function Nav() {
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-sm text-white/70 hover:text-white hover:border-white/30 transition-all duration-200"
             >
-              Discord
+              <MessageSquare className="size-3.5 text-[#3b9eff]" />
+              <span>Discord</span>
             </a>
             <button
               onClick={() => go("#register")}
@@ -110,9 +113,10 @@ export default function Nav() {
               href="https://discord.gg/Q2Z5FSxTG4"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-center rounded-full border border-white/20 py-3 text-sm text-white/60"
+              className="flex items-center justify-center gap-2 rounded-full border border-white/20 py-3 text-sm text-white/60"
             >
-              Join Discord
+              <MessageSquare className="size-4 text-[#3b9eff]" />
+              <span>Join Discord</span>
             </a>
             <button
               onClick={() => go("#register")}

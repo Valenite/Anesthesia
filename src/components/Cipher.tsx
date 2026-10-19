@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { playTactileClick, playSuccessChime } from "@/lib/audio";
-import { Check, Copy, HelpCircle, ArrowRight, Lock, Unlock } from "lucide-react";
+import { Check, Copy, HelpCircle, ArrowRight, Lock, Unlock, AlertCircle } from "lucide-react";
 
 const ENCODED = "YIVXZS";
 const ANSWER = "BREACH";
@@ -143,9 +143,10 @@ export default function Cipher() {
                   </form>
 
                   {error && (
-                    <p className="mt-3 text-center text-xs text-red-400 font-mono">
-                      Incorrect key. Check the cipher hint and try again.
-                    </p>
+                    <div className="mt-3 flex items-center justify-center gap-2 text-xs text-red-400 font-mono">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      <span>Incorrect key. Check the cipher hint and try again.</span>
+                    </div>
                   )}
                 </div>
               ) : (
