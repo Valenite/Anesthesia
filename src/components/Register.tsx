@@ -544,7 +544,6 @@ export default function Register() {
                             maxLength={24}
                             placeholder="e.g. CIPHERPUNKS"
                             className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm font-mono text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
-                            autoFocus
                           />
                           {errors.teamName && (
                             <p className="mt-2 text-xs text-red-400 font-mono">{errors.teamName}</p>
@@ -593,7 +592,6 @@ export default function Register() {
                             onChange={(e) => set("leader", e.target.value)}
                             placeholder="Your full name"
                             className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
-                            autoFocus
                           />
                           {errors.leader && (
                             <p className="mt-2 text-xs text-red-400 font-mono">{errors.leader}</p>
@@ -749,7 +747,6 @@ export default function Register() {
                         placeholder="e.g. AN-W03I1"
                         maxLength={12}
                         className="flex-1 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm font-mono tracking-wider text-white placeholder:text-white/20 focus:border-[#3b9eff] focus:outline-none transition-colors"
-                        autoFocus
                       />
                       <button
                         type="button"

@@ -56,10 +56,11 @@ export default function TerminalDrawer() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (open && logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [open, lines]);
 
@@ -101,7 +102,6 @@ export default function TerminalDrawer() {
   about             Overview of the Anesthesia competition
   format            Explain the 4-phase tournament timeline
   dossier           Show event telemetry & specifications
-  prizes            View prize tiers and honors
   team              Meet the CryptX challenge architects
   cipher            Inspect the Level 0 warm-up puzzle
   decode <text>     Run real-time Atbash substitution decoder
@@ -163,13 +163,6 @@ export default function TerminalDrawer() {
         });
         break;
 
-      case "prizes":
-        newOutputs.push({
-          id: String(Date.now() + 1),
-          type: "output",
-          text: "SPOILS:\n- 1st Place: Grand Champion of Anesthesia (Combined Leaderboard)\n- Track Honors: Best Cryptic Clear & Best CTF First Blood\n- Finalists: Top 10 Squad Plaques & Hall of Fame Immortality",
-        });
-        break;
 
       case "team":
         newOutputs.push({
@@ -373,7 +366,7 @@ export default function TerminalDrawer() {
     } else if (e.key === "Tab") {
       e.preventDefault();
       const commands = [
-        "help", "about", "format", "dossier", "prizes", "team", "cipher",
+        "help", "about", "format", "dossier", "team", "cipher",
         "decode", "register", "join", "ls", "cat", "whoami", "ping", "date",
         "matrix", "theme", "clear", "discord", "exit"
       ];
@@ -450,7 +443,7 @@ export default function TerminalDrawer() {
           </div>
 
           {/* Terminal Output Log Area */}
-          <div className="flex-1 overflow-y-auto p-5 font-mono text-xs leading-relaxed space-y-2 select-text">
+          <div ref={logContainerRef} className="flex-1 overflow-y-auto p-5 font-mono text-xs leading-relaxed space-y-2 select-text">
             {lines.map((l) => (
               <div key={l.id}>
                 {l.type === "banner" ? (
@@ -495,7 +488,6 @@ export default function TerminalDrawer() {
               onKeyDown={handleKeyDown}
               placeholder="Type command... (try 'help' or 'cat flag.txt')"
               className="w-full bg-transparent font-mono text-xs text-white focus:outline-none placeholder:opacity-30"
-              autoFocus
             />
             <button
               onClick={() => execute(input)}

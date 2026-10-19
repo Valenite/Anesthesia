@@ -9,7 +9,6 @@ const LINKS = [
   { label: "Format", hash: "#format" },
   { label: "Dossier", hash: "#dossier" },
   { label: "Cipher", hash: "#warmup" },
-  { label: "Prizes", hash: "#prizes" },
   { label: "Team", hash: "#team" },
   { label: "FAQ", hash: "#faq" },
 ];

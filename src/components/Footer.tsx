@@ -9,7 +9,6 @@ const LINKS = [
   { label: "Structure", hash: "#format" },
   { label: "The Dossier", hash: "#dossier" },
   { label: "Level 0 Cipher", hash: "#warmup" },
-  { label: "Prizes", hash: "#prizes" },
   { label: "The Architects", hash: "#team" },
   { label: "Register", hash: "#register" },
   { label: "FAQ", hash: "#faq" },

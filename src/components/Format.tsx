@@ -35,7 +35,7 @@ const PHASES = [
     title: "The Master Leaderboard",
     subtitle: "One unified score decides the champion",
     desc: "When the 48-hour timer runs out, points from both the Cryptic Hunt and CTF challenges merge into one single master scoreboard. The top squad on the combined leaderboard is crowned the Anesthesia Champion.",
-    highlights: ["Aggregated scoring", "Trophies & undisclosed prize pool", "Permanent Hall of Fame placement"],
+    highlights: ["Aggregated scoring", "Trophies & Master Laurels", "Permanent Hall of Fame placement"],
   },
 ];
 
