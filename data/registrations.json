@@ -1,0 +1,35 @@
+[
+  {
+    "teamName": "PHANTOM",
+    "size": 2,
+    "leader": "Aarav Sharma",
+    "email": "phantom@cryptx.org",
+    "phone": "+919876543210",
+    "college": "IIT Delhi",
+    "code": "BREACH-10",
+    "bonus": true,
+    "teamCode": "AN-W03I1",
+    "id": 2,
+    "createdAt": "2026-10-19T09:56:13.077Z",
+    "member2": {
+      "name": "Rohan Varma",
+      "email": "rohan@cryptx.org",
+      "phone": "+919876543211",
+      "college": "IIT Delhi",
+      "joinedAt": "2026-10-19T10:16:26.610Z"
+    }
+  },
+  {
+    "teamName": "Valenite",
+    "size": 2,
+    "leader": "Electrion",
+    "email": "valenitejs@gmail.com",
+    "phone": "+919667944410",
+    "college": "GENESIZ",
+    "code": "",
+    "bonus": false,
+    "teamCode": "AN-D5YH4",
+    "id": 1,
+    "createdAt": "2026-10-18T17:33:09.762Z"
+  }
+]

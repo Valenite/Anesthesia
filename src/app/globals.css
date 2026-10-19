@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #06070a;
+  --color-panel: #0d0f15;
+  --color-panel-light: #131722;
+  --color-ink: #f0f2f7;
+  --color-fog: #868c9c;
+  --color-acid: #3b9eff;
+  --color-acid-glow: rgba(59, 158, 255, 0.25);
+  --color-blood: #ff3b5c;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-glow: rgba(59, 158, 255, 0.2);
+
+  --font-display: "Cinzel", "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+
+html {
+  background: var(--color-void);
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Crisp, natural scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+::-webkit-scrollbar-thumb {
+  background: #191e2b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2b354c;
+}
+
+/* Selection */
+::selection {
+  background: rgba(59, 158, 255, 0.35);
+  color: #ffffff;
+}
+
+/* Lenis smooth-scroll styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Glass panel utility */
+.glass-panel {
+  background: rgba(13, 15, 21, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  border-color: rgba(59, 158, 255, 0.3);
+  background: rgba(19, 23, 34, 0.85);
+  transform: translateY(-2px);
+}
+
+/* Marquee */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee var(--mq, 28s) linear infinite;
+  will-change: transform;
+}
+.mq-reverse .marquee-track {
+  animation-direction: reverse;
+}
+.mq-hover:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Subtle heartbeat pulse */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  14% { transform: scale(1.25); opacity: 1; }
+  28% { transform: scale(1); opacity: 0.85; }
+  42% { transform: scale(1.15); opacity: 1; }
+}
+.heartbeat {
+  animation: heartbeat 2s ease-in-out infinite;
+}
+
+/* Form input focus */
+input, textarea {
+  caret-color: var(--color-acid);
+}
+
+button, a, [role="button"], input[type="submit"] {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .heartbeat {
+    animation: none !important;
+  }
+}
